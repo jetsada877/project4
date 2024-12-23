@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses Management</title>
+    <link rel="stylesheet" href="menu.css">
+        <!-- เพิ่ม CSS และ JavaScript ของ Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- CSS ของ Select2, Toastr และ Flatpickr -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+
+    <style>
+        /* สไตล์พื้นฐาน */
+        body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
+
+        /* Container for Content */
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+    h1 {
+        text-align: center;
+        color: #007bff;
+    }
+
+    /* กรองข้อมูล */
+    .filter-section {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .filter-section input {
+        padding: 10px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+/* ปรับสไตล์พื้นฐาน */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #007bff;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* ปรับฟอร์ม */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #444;
+}
+
+input, select {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* ปรับปุ่ม */
+button {
+    grid-column: span 2;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* ปรับตาราง */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* ปรับการแสดง dropdown ของ select2 */
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-selection {
+    height: 40px;
+}
+
+/* เพิ่มการจัดวางให้สวยงามขึ้น */
+.container {
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 40px;
+}
+
+/* ใช้ให้ select2 มีสไตล์ทันสมัย */
+.select2-container .select2-selection--single {
+    height: 45px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.select2-container .select2-selection--multiple {
+    height: 45px;
+    padding: 8px;
+}
+
+/* เพิ่มการแสดงปุ่มที่ใช้งานได้ */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+</style>
+</head>
+<body>
+        <!-- Header ด้านบน -->
+        <header class="menu-header">
+            <h1 id="username-display">Welcome, [Username]</h1>
+            <a href="index.html" class="logout-btn" id="logout">Logout</a>
+        </header>
+    
+    <!-- Sidebar Menu -->
+    <nav class="menu-nav" id="menu">
+        <button class="toggle-btn" id="toggle-btn">☰</button>
+        <ul>
+            <li>
+                <a href="menu.html">
+                    <span class="menu-icon">🖥️</span>
+                    <span class="menu-text">หน้าแรก</span>
+                </a>
+            </li>
+            <li>
+                <a href="dashboard.html">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="menu-toggle">
+                    <span class="menu-icon">💵</span>
+                    <span class="menu-text">ค่าใช้จ่าย</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="expenses-add.html">เพิ่มค่าใช้จ่าย</a></li>
+                    <li><a href="expenses-view.html">ดูรายการค่าใช้จ่าย</a></li>
+                    <li><a href="expenses-reports.html">รายงานค่าใช้จ่าย</a></li>
+                </ul>
+            </li>          
+            <li>
+                <a href="user-management.html">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">User Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="reports.html">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="account-codes.html">
+                    <span class="menu-icon">📂</span>
+                    <span class="menu-text">Account Codes</span>
+                </a>
+            </li>            
+            <li>
+                <a href="settings.html">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+        <div class="content" id="content">
+        <h1>Expenses Management</h1>
+            <h1>บันทึกค่าใช้จ่าย</h1>
+        
+            <!-- ฟอร์มบันทึกค่าใช้จ่าย -->
+            <form id="expenseForm">
+                <label for="expenseDate">วันที่</label>
+                <input type="text" id="expenseDate" placeholder="วัน/เดือน/ปี" readonly required>
+           
+                <label for="accountType">ประเภทบัญชี</label>
+                <select id="accountType" class="select2" required>
+                    <option value="">เลือกประเภทบัญชี</option>
+                    <!-- ข้อมูลประเภทบัญชีจะแสดงที่นี่ -->
+                </select>
+        
+                <label for="category">หมวดหมู่</label>
+                <select id="category" class="select2" required>
+                    <option value="">เลือกหมวดหมู่</option>
+                    <!-- ข้อมูลหมวดหมู่จะแสดงที่นี่ -->
+                </select>
+        
+                <label for="description">รายละเอียด</label>
+                <select id="description" class="select2" required>
+                    <option value="">เลือกรายละเอียด</option>
+                    <!-- ข้อมูลรายละเอียดจะแสดงที่นี่ -->
+                </select>
+        
+                <label for="amount">จำนวนเงิน</label>
+                <input type="number" id="amount" required>
+        
+                <button type="submit" class="btn-primary">บันทึก</button>
+            </form>
+    
+                    <!-- ส่วนกรองข้อมูล -->
+                    <div class="filter-section">
+                        <input type="date" id="startDate" placeholder="วันที่เริ่มต้น">
+                        <input type="date" id="endDate" placeholder="วันที่สิ้นสุด">
+                        <input type="text" id="search" placeholder="ค้นหาข้อมูล...">
+                        <button id="filterBtn">กรอง</button>
+                        <button id="exportBtn" class="btn-primary">ส่งออกเป็น Excel</button>
+                    </div>
+                    
+            <!-- ตารางแสดงรายการค่าใช้จ่าย -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>วันที่</th>
+                        <th>เดือน</th>
+                        <th>ประเภท</th>
+                        <th>หมวดหมู่</th>
+                        <th>รายละเอียด</th>
+                        <th>จำนวนเงิน (บาท)</th>
+                        <th>การกระทำ</th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTableBody">
+                    <!-- ข้อมูลจะแสดงตรงนี้ -->
+                </tbody>
+            </table>
+
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+        <script>
+            // ฟังก์ชันส่งออก Excel
+            $('#exportBtn').on('click', function() {
+                const wb = XLSX.utils.table_to_book(document.querySelector('table'), { sheet: "Expenses" });
+    
+                // สร้างไฟล์ Excel และดาวน์โหลด
+                XLSX.writeFile(wb, 'expenses.xlsx');
+            });
+        </script>
+    
+            <!-- เพิ่ม JS -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        
+    
+            <script>
+                $(document).ready(function() {
+                    // แสดงวันที่ปัจจุบันในช่องกรอกวันที่
+                    const today = new Date();
+                    const formattedToday = today.toLocaleDateString('en-GB');  // จัดรูปแบบเป็น DD/MM/YYYY
+                    $('#expenseDate').val(formattedToday);
+            
+                    // ฟังก์ชันดึงข้อมูลจาก API
+                    async function fetchAccounts() {
+                        try {
+                            const response = await fetch('http://192.168.1.149:3000/accounts');
+                            const accounts = await response.json();
+            
+                            const accountTypeSelect = $('#accountType');
+                            const categorySelect = $('#category');
+                            const descriptionSelect = $('#description');
+            
+                            // ใช้ Set เพื่อกรองข้อมูลประเภทบัญชีที่ไม่ซ้ำ
+                            const uniqueTypes = new Set(accounts.map(account => account.type));
+                            const uniqueCategories = new Set(accounts.map(account => account.category));
+                            const uniqueDetails = new Set(accounts.map(account => account.details));
+            
+                            // แสดงประเภทบัญชีใน dropdown
+                            uniqueTypes.forEach(type => accountTypeSelect.append(`<option value="${type}">${type}</option>`));
+                            uniqueCategories.forEach(category => categorySelect.append(`<option value="${category}">${category}</option>`));
+                            uniqueDetails.forEach(details => descriptionSelect.append(`<option value="${details}">${details}</option>`));
+            
+                            // ทำให้ select2 ทำงาน
+                            $('#accountType, #category, #description').select2();
+            
+                            // ฟังก์ชันกรองข้อมูลเมื่อเลือกรายละเอียด
+                            descriptionSelect.on('change', function() {
+                                const selectedDetails = $(this).val();
+                                const filteredTypes = new Set();
+                                const filteredCategories = new Set();
+            
+                                accounts.forEach(account => {
+                                    if (account.details === selectedDetails) {
+                                        filteredTypes.add(account.type);
+                                        filteredCategories.add(account.category);
+                                    }
+                                });
+            
+                                // ตั้งค่าตัวเลือกแรกที่พบในกรณีที่กรองข้อมูล
+                                if (filteredTypes.size > 0) {
+                                    accountTypeSelect.val([...filteredTypes][0]).trigger('change');
+                                }
+                                if (filteredCategories.size > 0) {
+                                    categorySelect.val([...filteredCategories][0]).trigger('change');
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Error fetching accounts:', error);
+                        }
+                    }
+            
+                    // เรียกใช้งานฟังก์ชันเมื่อหน้าโหลด
+                    fetchAccounts();
+                });
+            </script>
+            
+    <script>
+$(document).ready(function() {
+    // แสดงวันที่ปัจจุบันในช่องกรอกวันที่
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');  // เดือน (ต้องเติม 0 หน้าเลขถ้าเดือนน้อยกว่า 10)
+    const day = today.getDate().toString().padStart(2, '0');  // วัน (ต้องเติม 0 หน้าเลขถ้าวันน้อยกว่า 10)
+
+    // กำหนดค่าให้ช่องกรอกวันที่
+    $('#expenseDate').val(`${day}/${month}/${year}`);  // รูปแบบที่ input[type="date"] ต้องการ: DD/MM/YYYY
+    $('#startDate').val(`${day}/${month}/${year}`); // ตั้งค่า startDate เป็นวันที่วันนี้
+    $('#endDate').val(`${day}/${month}/${year}`); // ตั้งค่า endDate เป็นวันที่วันนี้
+
+    // ฟังก์ชันดึงข้อมูลจาก API
+    async function fetchExpenses() {
+        const startDate = $('#startDate').val();
+        const endDate = $('#endDate').val();
+        const search = $('#search').val();
+
+        // สร้าง URL สำหรับ API โดยใส่พารามิเตอร์ที่กรอง
+        let url = 'http://192.168.1.149:3000/expenses?';
+        if (startDate) url += `startDate=${startDate}&`;
+        if (endDate) url += `endDate=${endDate}&`;
+        if (search) url += `search=${search}&`;
+
+        // กำจัด & ส่วนเกินที่มาจากการกรอกพารามิเตอร์
+        url = url.slice(0, -1);
+
+        const response = await fetch(url);
+        const expenses = await response.json();
+
+        const expenseTableBody = $('#expenseTableBody');
+        expenseTableBody.empty();  // ล้างตารางก่อนเพิ่มข้อมูลใหม่
+
+        // แปลง startDate และ endDate ให้เป็น Date object เพื่อใช้ในการกรอง
+        const startDateObj = startDate ? new Date(startDate.split('/').reverse().join('-')) : null;
+        const endDateObj = endDate ? new Date(endDate.split('/').reverse().join('-')) : null;
+
+        // จัดเรียง expenses ตามวันที่ โดยเอาวันที่ล่าสุดอยู่ก่อน
+        expenses.sort((a, b) => {
+            const dateA = new Date(a.expense_date.split('/').reverse().join('-'));
+            const dateB = new Date(b.expense_date.split('/').reverse().join('-'));
+            return dateB - dateA; // เรียงลำดับจากวันที่ล่าสุดไปวันที่เก่าสุด
+        });
+
+        expenses.forEach((expense, index) => {
+    const expenseDateObj = new Date(expense.expense_date.split('/').reverse().join('-'));
+
+    // ตรวจสอบช่วงวันที่และคำค้นหา
+    if ((startDateObj && expenseDateObj < startDateObj) || (endDateObj && expenseDateObj > endDateObj)) {
+        return; // ข้ามรายการที่ไม่ตรงกับช่วงวันที่
+    }
+
+    if (search && !(
+        expense.expense_date.includes(search) ||
+        expense.account_type.includes(search) ||
+        expense.category.includes(search) ||
+        expense.description.includes(search)
+    )) {
+        return; // ข้ามรายการที่ไม่ตรงกับคำค้นหา
+    }
+
+    const newRow = `
+        <tr data-id="${expense.id}">
+            <td>${index + 1}</td>
+            <td>${expense.expense_date}</td>
+            <td>${expense.month}</td>
+            <td>${expense.account_type}</td>
+            <td>${expense.category}</td>
+            <td>${expense.description}</td>
+            <td>${expense.amount.toFixed(2)}</td>
+            <td><button class="btn-danger btn-delete">ลบ</button></td>
+        </tr>
+    `;
+
+    // เพิ่มแถวใหม่ที่ตำแหน่งแรกของตาราง
+    expenseTableBody.prepend(newRow);  // ใช้ prepend() แทน append()
+});
+
+
+        // อัปเดตเลขลำดับใหม่ให้ถูกต้องหลังจากเพิ่มแถวใหม่
+        $('#expenseTableBody tr').each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    }
+    
+    
+            // ฟังก์ชันลบรายการในตาราง
+            $('#expenseTableBody').on('click', '.btn-delete', function() {
+                const confirmDelete = confirm("คุณต้องการลบรายการนี้หรือไม่?");
+                if (confirmDelete) {
+                    const row = $(this).closest('tr');  // หาแถวที่ผู้ใช้เลือก
+                    const expenseId = row.data('id');   // กำหนดให้แถวมี data-id เป็น ID ของข้อมูล
+    
+                    // ส่งคำขอลบไปยัง API
+                    fetch(`http://192.168.1.149:3000/expenses/${expenseId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Expense deleted successfully') {
+                            alert('ลบรายการเรียบร้อยแล้ว');
+                            row.remove();  // ลบแถวจากตาราง
+                        } else {
+                            alert('ไม่สามารถลบข้อมูลได้');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+    
+            // เมื่อคลิกปุ่มกรอง
+            $('#filterBtn').on('click', function() {
+                fetchExpenses();  // เรียกฟังก์ชันกรองเมื่อกดปุ่มกรอง
+            });
+    
+// ฟังก์ชันบันทึกข้อมูล
+$('#expenseForm').submit(function(event) {
+    event.preventDefault(); // หยุดการรีเฟรชหน้า
+
+    const expenseDate = $('#expenseDate').val() || new Date().toLocaleDateString('th-TH');  // ใช้วันที่วันนี้หากไม่มีการกรอก
+    const accountType = $('#accountType').val();
+    const category = $('#category').val();
+    const description = $('#description').val();
+    const amount = $('#amount').val();
+
+    // แปลงวันที่ที่กรอกให้เป็นรูปแบบที่ JavaScript เข้าใจ
+    const dateParts = expenseDate.split('/');
+    const formattedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+
+    // ตรวจสอบว่าการแปลงวันที่สำเร็จหรือไม่
+    if (isNaN(formattedDate)) {
+        alert('วันที่ไม่ถูกต้อง');
+        return;
+    }
+
+    // แสดงเลขเดือนจากวันที่ที่แปลงแล้ว
+    const monthNumber = formattedDate.getMonth() + 1;
+
+    // เพิ่มข้อมูลในตาราง
+    const expenseTableBody = $('#expenseTableBody');
+    const newRow = `
+        <tr>
+            <td>${expenseTableBody.children().length + 1}</td>
+            <td>${expenseDate}</td>
+            <td>${monthNumber}</td>
+            <td>${accountType}</td>
+            <td>${category}</td>
+            <td>${description}</td>
+            <td>${parseFloat(amount).toFixed(2)}</td>
+            <td><button class="btn-danger btn-delete">ลบ</button></td>
+        </tr>
+    `;
+
+    // เพิ่มแถวใหม่ที่ตำแหน่งแรกสุด
+    expenseTableBody.prepend(newRow); // เพิ่มแถวใหม่ที่ตำแหน่งแรกสุด
+
+    // รีเซ็ตฟอร์มหลังจากบันทึก แต่ไม่ล้างช่องวันที่
+    $('#expenseForm')[0].reset();
+    $('#accountType, #category, #description').val('').trigger('change');
+    $('#expenseDate').val(expenseDate);
+
+    // ส่งข้อมูลไปยัง API
+    const expenseData = {
+        expenseDate: expenseDate,
+        month: monthNumber,  // เพิ่มข้อมูลเดือน
+        accountType: accountType,
+        category: category,
+        description: description,
+        amount: parseFloat(amount)
+    };
+
+    fetch('http://192.168.1.149:3000/expenses', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(expenseData)
+    })
+    .then(response => response.json())
+    .then(() => {
+        toastr.success('บันทึกข้อมูลค่าใช้จ่ายสำเร็จ');
+        // ไม่ต้องเรียก fetchExpenses() เพราะไม่ต้องรีเฟรชข้อมูลทั้งหมด
+    })
+    .catch(error => {
+        toastr.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        console.error('Error:', error);
+    });
+});
+
+            // เรียกฟังก์ชันเมื่อหน้าโหลด
+            fetchExpenses();  // เรียกดึงข้อมูลค่าใช้จ่ายเมื่อโหลดหน้า
+        });
+    </script>
+
+<script>
+    // ดึง Element ต่าง ๆ
+    const menu = document.getElementById("menu");
+    const toggleBtn = document.getElementById("toggle-btn");
+    const content = document.getElementById("content");
+
+    // เพิ่ม Event Listener สำหรับปุ่ม Toggle
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("collapsed"); // ย่อ/ขยายเมนู
+        content.classList.toggle("collapsed"); // ขยาย/ย่อ Content ตาม
+    });
+
+// ดึงข้อมูลผู้ใช้จาก localStorage
+const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+if (loggedInUser) {
+document.getElementById('username-display').textContent = `Welcome, ${loggedInUser.username}`;
+} else {
+// หากยังไม่ได้เข้าสู่ระบบ ให้เปลี่ยนไปหน้า Login
+window.location.href = 'login.html';
+}
+
+
+    // ฟังก์ชัน Logout
+    document.getElementById("logout").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "index.html";
+    });
+</script>
+
+</body>
+</html>

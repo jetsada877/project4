@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f9;
+            flex-direction: column; /* เพิ่มเพื่อให้ตัวเนื้อหายืดตามความสูงของหน้าจอ */
+        }
+
+        /* Header ด้านบน */
+        .menu-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #d20000; /* สีแดง */
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .menu-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+            color: white;
+            background-color: #b30000;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff3f3f;
+        }
+
+        /* Sidebar Menu */
+        .menu-nav {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100% - 60px);
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 50px 0;
+            transition: width 0.3s;
+            overflow-x: hidden;
+        }
+
+        .menu-nav.collapsed {
+            width: 80px; /* ซ่อนเมนูแสดงแค่ไอคอน */
+        }
+
+        .menu-nav ul {
+            list-style: none;
+        }
+
+        .menu-nav ul li {
+            margin: 0px 0;
+        }
+
+        .menu-nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .menu-nav ul li a:hover {
+            background-color: #ffcc00; /* สีเหลืองเมื่อ hover */
+            color: #d20000; /* ข้อความเป็นสีแดง */
+        }
+
+        /* ไอคอน */
+        .menu-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* ซ่อนข้อความเมนูเมื่อเมนูย่อ */
+        .menu-nav.collapsed .menu-text {
+            display: none;
+        }
+
+        /* ปุ่มแสดง/ซ่อนเมนู */
+        .toggle-btn {
+            position: absolute;
+            top: 2.5px;
+            right: 25px;
+            background-color: #ffcc00; /* สีเหลือง */
+            color: #d20000; /* สีแดง */
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #d20000; /* สีแดงเมื่อ hover */
+            color: #fff; /* ข้อความเป็นสีขาวเมื่อ hover */
+        }
+
+        /* Content */
+        .content {
+            margin-left: 250px;
+            margin-top: 60px;
+            min-width: auto;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+
+        .content.collapsed {
+            margin-left: 80px; /* ลดขนาดพื้นที่ content เมื่อเมนูย่อ */
+        }
+
+        .submenu {
+            display: none;
+            list-style: none;
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .submenu li {
+            margin: 5px 0;
+        }
+
+        /* เพิ่มสไตล์เมื่อเมนูถูกเปิด */
+        .menu-toggle.open + .submenu {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .menu-nav {
+                width: 200px;
+            }
+
+            .content {
+                margin-left: 200px;
+            }
+
+            .toggle-btn {
+                right: 15px;
+            }
+
+            .menu-header h1 {
+                font-size: 1.2rem;
+            }
+
+            /* เมนูเมื่อหน้าจอเล็กลง */
+            .menu-nav.collapsed {
+                width: 60px;
+            }
+
+            .menu-nav.collapsed .menu-text {
+                display: none;
+            }
+
+            .content.collapsed {
+                margin-left: 60px; /* ลดขนาดเมื่อเมนูย่อ */
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .menu-nav {
+                width: 100%;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .toggle-btn {
+                display: none; /* ซ่อนปุ่ม toggle เมื่อใช้หน้าจอขนาดเล็ก */
+            }
+
+            .menu-nav.collapsed {
+                width: 100%;
+            }
+
+            .menu-header {
+                height: 50px;
+                padding: 0 10px;
+            }
+
+            .menu-header h1 {
+                font-size: 1rem;
+            }
+        }
+
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-bar button:hover {
+            background-color: #0056b3;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .user-table th, .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .user-table th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .user-table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .actions button {
+            padding: 6px 12px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .actions button:hover {
+            background-color: #e09b3d;
+        }
+
+        .add-user-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .add-user-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+
+        .close-btn {
+            background-color: #ccc;
+            color: black;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background-color: #999;
+        }
+
+        /* Add User Section */
+        .add-user-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .add-user-section h2 {
+            margin-bottom: 20px;
+        }
+
+        .add-user-section form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .add-user-section input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .add-user-section button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .add-user-section button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header ด้านบน -->
+    <header class="menu-header">
+        <h1 id="username-display">Welcome, [Username]</h1>
+        <a href="index.html" class="logout-btn" id="logout">Logout</a>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <nav class="menu-nav" id="menu">
+        <button class="toggle-btn" id="toggle-btn">☰</button>
+        <ul>
+            <li>
+                <a href="menu.html">
+                    <span class="menu-icon">🖥️</span>
+                    <span class="menu-text">หน้าแรก</span>
+                </a>
+            </li>
+            <li>
+                <a href="dashboard.html">
+                    <span class="menu-icon">📊</span>
+                    <span class="menu-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="menu-toggle">
+                    <span class="menu-icon">💵</span>
+                    <span class="menu-text">ค่าใช้จ่าย</span>
+                </a>
+                <ul class="submenu">
+                    <li><a href="expenses-add.html">เพิ่มค่าใช้จ่าย</a></li>
+                    <li><a href="expenses-view.html">ดูรายการค่าใช้จ่าย</a></li>
+                    <li><a href="expenses-reports.html">รายงานค่าใช้จ่าย</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="user-management.html">
+                    <span class="menu-icon">👤</span>
+                    <span class="menu-text">User Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="reports.html">
+                    <span class="menu-icon">📈</span>
+                    <span class="menu-text">Reports</span>
+                </a>
+            </li>
+            <li>
+                <a href="account-codes.html">
+                    <span class="menu-icon">📂</span>
+                    <span class="menu-text">Account Codes</span>
+                </a>
+            </li>
+            <li>
+                <a href="settings.html">
+                    <span class="menu-icon">⚙️</span>
+                    <span class="menu-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="content" id="content">
+        <div class="add-user-section">
+            <h2>เพิ่มผู้ใช้งานระบบ</h2>
+            <form id="userForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="text" id="fullName" placeholder="Full Name" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Add User</button>
+            </form>
+        </div>
+        <h2>Users List</h2>
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // ดึงปุ่มเมนูทั้งหมดที่มี class menu-toggle
+        const menuToggles = document.querySelectorAll('.menu-toggle');
+
+        menuToggles.forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggle.classList.toggle('open'); // เปิด/ปิดเมนูย่อย
+            });
+        });
+    </script>
+
+    <script>
+        const apiUrl = 'http://192.168.1.149:3000/users';
+
+        // ตรวจสอบ username ซ้ำ
+        const checkUsernameExists = async (username) => {
+            const response = await fetch(apiUrl);
+            const users = await response.json();
+            return users.some(user => user.username === username); // ตรวจสอบว่า username ซ้ำหรือไม่
+        };
+
+        // โหลดผู้ใช้งาน
+        const loadUsers = async () => {
+            const response = await fetch(apiUrl);
+            const users = await response.json();
+            const table = document.getElementById('userTable');
+            table.innerHTML = '';
+            users.forEach(user => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.fullName}</td>
+                        <td>${user.created_at}</td>
+                        <td><button onclick="deleteUser(\\${user.id})">Delete</button></td>
+                    </tr>
+                `;
+            });
+        };
+
+        // เพิ่มผู้ใช้งาน
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const fullName = document.getElementById('fullName').value;
+            const password = document.getElementById('password').value;
+
+            // ตรวจสอบว่า username ซ้ำหรือไม่
+            const isUsernameExist = await checkUsernameExists(username);
+            if (isUsernameExist) {
+                alert('Username นี้มีผู้ใช้งานแล้ว กรุณาเลือกใหม่');
+                return; // หยุดการทำงานหาก username ซ้ำ
+            }
+
+            // หากไม่มีการซ้ำก็ทำการเพิ่มผู้ใช้งานใหม่
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, fullName, password })
+            });
+
+            document.getElementById('userForm').reset();
+            loadUsers();
+        });
+
+        // ลบผู้ใช้งาน
+        const deleteUser = async (id) => {
+            await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+            loadUsers();
+        };
+
+        // โหลดข้อมูลผู้ใช้งานครั้งแรก
+        loadUsers();
+    </script>
+    <script>
+    // ดึง Element ต่าง ๆ
+    const menu = document.getElementById("menu");
+    const toggleBtn = document.getElementById("toggle-btn");
+    const content = document.getElementById("content");
+
+    // เพิ่ม Event Listener สำหรับปุ่ม Toggle
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("collapsed"); // ย่อ/ขยายเมนู
+        content.classList.toggle("collapsed"); // ขยาย/ย่อ Content ตาม
+    });
+
+// ดึงข้อมูลผู้ใช้จาก localStorage
+const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+if (loggedInUser) {
+    document.getElementById('username-display').textContent = `Welcome, ${loggedInUser.username}`;
+} else {
+    // หากยังไม่ได้เข้าสู่ระบบ ให้เปลี่ยนไปหน้า Login
+    window.location.href = 'index.html';
+}
+
+    // ฟังก์ชัน Logout
+    document.getElementById("logout").addEventListener("click", (e) => {
+    e.preventDefault();
+    const confirmLogout = confirm("คุณต้องการออกจากระบบหรือไม่?");
+    if (confirmLogout) {
+        localStorage.removeItem("loggedInUser");
+        window.location.href = "index.html";
+    }
+});
+
+</script>
+
+</body>
+</html>

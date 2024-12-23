@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 2px solid #ffcc00; /* Yellow border */
+        }
+
+        .login-container h2 {
+            color: #d32f2f; /* Red color */
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .login-container label {
+            font-size: 14px;
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-container input:focus {
+            border-color: #ffcc00; /* Yellow focus */
+            outline: none;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d32f2f; /* Red button */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-container button:hover {
+            background-color: #b71c1c; /* Darker red when hovered */
+        }
+
+        .error-message {
+            color: #d32f2f; /* Red text for error message */
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            display: none;
+            font-size: 16px;
+            color: #ffcc00; /* Yellow color for loading */
+            margin-top: 10px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        /* Add responsiveness */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+            
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+        <p class="error-message" id="errorMessage"></p>
+        <p class="loading" id="loadingMessage">Logging in...</p>
+    </div>
+
+    <script>
+        const apiUrl = 'http://192.168.1.149:3000/users'; // URL สำหรับเรียกข้อมูล users
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+            // ดึงข้อมูลจากฟอร์ม
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            loadingMessage.classList.add('show'); // แสดงข้อความกำลังเข้าสู่ระบบ
+            errorMessage.textContent = ''; // ลบข้อความผิดพลาด
+
+            try {
+                // เรียกข้อมูลผู้ใช้งานจาก API
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const users = await response.json();
+
+                // ตรวจสอบ username และ password
+                const user = users.find(user => user.username === username && user.password === password);
+
+                loadingMessage.classList.remove('show'); // ซ่อนข้อความกำลังเข้าสู่ระบบ
+
+                if (user) {
+                    // หากเข้าสู่ระบบสำเร็จ
+                    alert('เข้าสู่ระบบสำเร็จ!');
+                    localStorage.setItem('loggedInUser', JSON.stringify(user)); // เก็บข้อมูลผู้ใช้ใน Local Storage
+                    window.location.href = 'menu.html'; // เปลี่ยนไปยังหน้า Dashboard
+                } else {
+                    // หาก username หรือ password ไม่ถูกต้อง
+                    errorMessage.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+                }
+            } catch (error) {
+                loadingMessage.classList.remove('show'); // ซ่อนข้อความกำลังเข้าสู่ระบบ
+                errorMessage.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ API';
+            }
+        });
+    </script>
+</body>
+</html>
